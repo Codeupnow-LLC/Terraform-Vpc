@@ -7,13 +7,13 @@ resource "aws_vpc" "myvpc" {
 
 resource "aws_subnet" "public_subnet" {
   vpc_id     = aws_vpc.myvpc.id
-  cidr_block = "10.0.1.0/24"
+  cidr_block = var.public_subnet
   map_public_ip_on_launch = true 
 }
 
 resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.myvpc.id
-  cidr_block = "10.0.2.0/24"
+  cidr_block = var.private_subnet
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -34,8 +34,7 @@ resource "aws_route_table_association" "PublicRTassociation" {
 }
 
 resource "aws_security_group" "nginx_sg" {
-  name        = "allow_ssh_http"
-  description = "Allow SSH and HTTP traffic"
+  
   vpc_id      = aws_vpc.myvpc.id
 
   ingress {
@@ -66,7 +65,7 @@ resource "aws_security_group" "nginx_sg" {
 
 resource "aws_instance" "nginx_instance" {
   ami                    = "ami-08012c0a9ee8e21c4"
-  instance_type          = "t2.micro"
+  instance_type          = var.aws_instance
   subnet_id              = aws_subnet.public_subnet.id
  
   associate_public_ip_address = true
@@ -84,6 +83,10 @@ resource "aws_instance" "nginx_instance" {
   }
 }
 
-output "instance_public_ip" {
-  value = aws_instance.nginx_instance.public_ip
+terraform {
+  backend "s3" {
+    bucket = "terraform-statefile"
+    key    = "path/to/terraform.tfstate"
+    region = var.region
+  }
 }
