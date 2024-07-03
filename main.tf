@@ -5,15 +5,15 @@ resource "aws_vpc" "myvpc" {
   }
 }
 
-resource "aws_subnet" "public_subnet" {
+resource "aws_subnet" "public_subnet_cidr" {
   vpc_id     = aws_vpc.myvpc.id
-  cidr_block = var.public_subnet
+  cidr_block = var.public_subnet_cidr_val
   map_public_ip_on_launch = true 
 }
 
-resource "aws_subnet" "private_subnet" {
+resource "aws_subnet" "private_subnet_cidr" {
   vpc_id     = aws_vpc.myvpc.id
-  cidr_block = var.private_subnet
+  cidr_block = var.private_subnet_cidr_val
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -29,7 +29,7 @@ resource "aws_route_table" "PublicRT" {
 }
 
 resource "aws_route_table_association" "PublicRTassociation" {
-  subnet_id      = aws_subnet.public_subnet.id
+  subnet_id = aws_subnet.public_subnet_cidr.id
   route_table_id = aws_route_table.PublicRT.id
 }
 
@@ -64,9 +64,10 @@ resource "aws_security_group" "nginx_sg" {
 }
 
 resource "aws_instance" "nginx_instance" {
+  name                   = "ngin_instance_${environment}"
   ami                    = "ami-08012c0a9ee8e21c4"
-  instance_type          = var.aws_instance
-  subnet_id              = aws_subnet.public_subnet.id
+  instance_type          = var.aws_instance_ty
+  subnet_id              = aws_subnet.public_subnet_cidr.id
  
   associate_public_ip_address = true
 
@@ -85,8 +86,8 @@ resource "aws_instance" "nginx_instance" {
 
 terraform {
   backend "s3" {
-    bucket = "terraform-statefile"
-    key    = "path/to/terraform.tfstate"
-    region = var.region
+    bucket = "terraform-statefile3"
+    key    = "${environment}/terraform.tfstate"
+    region = "us-west-1"
   }
 }
