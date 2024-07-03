@@ -1,0 +1,6 @@
+region = "us-west-1"
+cidr_block = "10.0.0.1/16"
+private_subnet_cidr_val = "10.0.1.0/24" 
+public_subnet_cidr_val = "10.0.2.0/24" 
+aws_instance_ty = "t2.medium"
+environment = "qa"
